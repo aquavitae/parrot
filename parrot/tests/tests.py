@@ -6,6 +6,7 @@ Tests for `parrot`, a twitter-like fedd parser.
 
 from unittest import TestCase
 
+import io
 import os.path
 from collections import defaultdict
 
@@ -23,6 +24,7 @@ Ward
 \t@Alan: If you have a procedure with 10 parameters, you probably missed some.
 \t@Ward: There are only two hard things in Computer Science: cache invalidation, naming things and off-by-1 errors.
 \t@Alan: Random numbers should not be generated with a method chosen at random.
+
 """
 
 root_path = os.path.dirname(__file__)
@@ -48,8 +50,6 @@ class TestPrescribedFiles(TestCase):
         This is a functional test that test that the final output is correct.
         """
         output = parrot.main(users_file=users_file, tweets_file=tweets_file)
-        print('||' + output.replace(' ', '~') + '||')
-        print('||' + expected_main_functionality_output.replace(' ', '~') + '||')
         self.assertEqual(output, expected_main_functionality_output)
 
     def test_parse_users(self):
@@ -76,6 +76,64 @@ class TestPrescribedFiles(TestCase):
         })
         self.maxDiff = None
         got = parrot.parse_tweets(tweets_file, self.expected_users)
-        from pprint import pprint
-        pprint(got)
         self.assertEqual(dict(got), dict(expect))
+
+
+class TestInputFiles(TestCase):
+
+    """
+    Test for various problems and variations with the input files.
+
+    Specifically, these test the `read_file` function.
+    """
+
+    def test_with_filename(self):
+        """
+        `read_file` should accept a filename.
+        """
+        # No exception should be raised by this line
+        list(parrot.read_file(users_file))
+
+    def test_with_open_file(self):
+        """
+        `read_file` should accept an open file
+        """
+        with open(users_file, 'rb') as fh:
+            # No exception should be raised by this line
+            list(parrot.read_file(fh))
+
+    def test_with_bytesio(self):
+        """
+        `read_file` should accept a BytesIO
+        """
+        fh = io.BytesIO(b'a\nb\nc')
+        # No exception should be raised by this line
+        list(parrot.read_file(fh))
+
+    def test_with_stringio(self):
+        """
+        `read_file` should fail on a StringIO.
+        """
+        fh = io.StringIO('a\nb\nc')
+        with self.assertRaises(TypeError):
+            list(parrot.read_file(fh))
+
+    def test_for_ascii_only_users(self):
+        """
+        Only ascii is allowed, so other characters should be stripped and
+        a warning logged
+        """
+        text = io.BytesIO('a follows b\u200b'.encode())
+        with self.assertLogs(parrot.log, 'WARN'):
+            lines = list(parrot.read_file(text))
+        self.assertEqual(lines, ['a follows b'])
+
+    def test_linends(self):
+        """
+        Lines should be returned the same wether ending with \n or \r\n
+        """
+        a = io.BytesIO(b'a\nb\nc')
+        b = io.BytesIO(b'a\r\nb\r\nc')
+        got_a = list(parrot.read_file(a))
+        got_b = list(parrot.read_file(b))
+        self.assertEqual(got_a, got_b)

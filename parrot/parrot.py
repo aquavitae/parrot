@@ -4,8 +4,39 @@
 Parrot - A twitter-like feed parser
 """
 
-
+import codecs
+import io
+import logging
 from collections import defaultdict
+
+log = logging.getLogger()
+
+
+def log_handler(err):
+    """
+    Handle unicode characters in the ascii input
+    """
+    log.warning(err)
+    return ('', err.end)
+codecs.register_error('log', log_handler)
+
+
+def read_file(file):
+    """
+    Read an open file, check for errors and yield each line.
+
+    `file` is expected to be either an open file in bytes mode or a filename.
+    Each line is decoded to ascii and any unicode characters logged.
+    """
+    if isinstance(file, str):
+        with open(file, 'rb') as fh:
+            btext = fh.read()
+    else:
+        btext = file.read()
+    btext = btext.replace(b'\r\n', b'\n')
+    for bline in btext.split(b'\n'):
+        text = bline.decode('ascii', 'log')
+        yield text
 
 
 def parse_users(users_file):
@@ -17,15 +48,17 @@ def parse_users(users_file):
     have an entry.
     """
     users = defaultdict(set)
-    with open(users_file, 'r') as fh:
-        for line in fh:
+    for line in read_file(users_file):
+        try:
             follower, _, posters = line.split(' ', 2)
-            for poster in posters.split(','):
-                poster = poster.strip()
-                users[poster].add(follower)
-                # Make sure eacch followers has an entry, even if they
-                # do not actually post
-                users[follower]
+        except ValueError:
+            continue
+        for poster in posters.split(','):
+            poster = poster.strip()
+            users[poster].add(follower)
+            # Make sure eacch followers has an entry, even if they
+            # do not actually post
+            users[follower]
     return users
 
 
@@ -37,15 +70,17 @@ def parse_tweets(tweets_file, users):
     tuples `(poster name, tweet)` as values.
     """
     tweets_per_user = defaultdict(list)
-    with open(tweets_file, 'r') as fh:
-        for line in fh:
+    for line in read_file(tweets_file):
+        try:
             poster, tweet = line.split('>', 1)
-            poster = poster.strip()
-            tweet = tweet.strip()
-            # Always add the tweet to the poster
-            tweets_per_user[poster].append((poster, tweet))
-            for follower in users[poster]:
-                tweets_per_user[follower].append((poster, tweet))
+        except ValueError:
+            continue
+        poster = poster.strip()
+        tweet = tweet.strip()
+        # Always add the tweet to the poster
+        tweets_per_user[poster].append((poster, tweet))
+        for follower in users[poster]:
+            tweets_per_user[follower].append((poster, tweet))
     return tweets_per_user
 
 
