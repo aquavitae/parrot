@@ -129,11 +129,11 @@ class TestInputFiles(TestCase):
         self.assertEqual(lines, ['a follows b'])
 
     def test_linends(self):
-        """
-        Lines should be returned the same wether ending with \n or \r\n
+        r"""
+        Lines should be returned the same whether ending with \n , \r or \r\n
         """
         a = io.BytesIO(b'a\nb\nc')
-        b = io.BytesIO(b'a\r\nb\r\nc')
+        b = io.BytesIO(b'a\r\nb\rc')
         got_a = list(parrot.read_file(a))
         got_b = list(parrot.read_file(b))
         self.assertEqual(got_a, got_b)

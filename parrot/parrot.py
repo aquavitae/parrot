@@ -33,7 +33,7 @@ def read_file(file):
             btext = fh.read()
     else:
         btext = file.read()
-    btext = btext.replace(b'\r\n', b'\n')
+    btext = btext.replace(b'\r\n', b'\n').replace(b'\r', b'\n')
     for bline in btext.split(b'\n'):
         text = bline.decode('ascii', 'log')
         yield text
