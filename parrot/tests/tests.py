@@ -137,3 +137,63 @@ class TestInputFiles(TestCase):
         got_a = list(parrot.read_file(a))
         got_b = list(parrot.read_file(b))
         self.assertEqual(got_a, got_b)
+
+
+class TestParseUsersFormat(TestCase):
+
+    """
+    Test different permutations of the users file format
+    """
+
+    def test_single_line(self):
+        users = io.BytesIO(b'a follows b, c')
+        got = dict(parrot.parse_users(users))
+        self.assertEqual(got, {'b': {'a'}, 'a': set(), 'c': {'a'}})
+
+    def test_blank_lines(self):
+        users = io.BytesIO(b'a follows b\n\n\n\nc follows d')
+        got = dict(parrot.parse_users(users))
+        self.assertEqual(got, {'b': {'a'}, 'd': {'c'}, 'a': set(), 'c': set()})
+
+    def test_caps(self):
+        users = io.BytesIO(b'A FOLLOWS B')
+        got = dict(parrot.parse_users(users))
+        self.assertEqual(got, {'B': {'A'}, 'A': set()})
+
+    def test_multiple_spaces(self):
+        users = io.BytesIO(b'a    follows     b   ,   c ')
+        got = dict(parrot.parse_users(users))
+        self.assertEqual(got, {'b': {'a'}, 'a': set(), 'c': {'a'}})
+
+    def test_other_symbols(self):
+        users = io.BytesIO(b'\\a_% follows \\n2')
+        got = dict(parrot.parse_users(users))
+        self.assertEqual(got, {'\\n2': {'\\a_%'}, '\\a_%': set()})
+
+    def test_names_follows(self):
+        users = io.BytesIO(b'follows follows follows')
+        got = dict(parrot.parse_users(users))
+        self.assertEqual(got, {'follows': {'follows'}})
+
+    def test_names_follows2(self):
+        users = io.BytesIO(b'a follows b, follows, c')
+        got = dict(parrot.parse_users(users))
+        self.assertEqual(got, {'b': {'a'}, 'follows': {'a'}, 'c': {'a'}, 'a': set()})
+
+    def test_missing_poster(self):
+        users = io.BytesIO(b'a follows')
+        got = dict(parrot.parse_users(users))
+        self.assertEqual(got, {'a': set()})
+
+    def test_double_names(self):
+        users = io.BytesIO(b'a b follows b c, c d')
+        got = dict(parrot.parse_users(users))
+        self.assertEqual(got, {'b c': {'a b'}, 'c d': {'a b'}, 'a b': set()})
+
+    def test_no_spaces(self):
+        """
+        This should not parse, since "afollowsb" could be someone's name.
+        """
+        users = io.BytesIO(b'afollowsb')
+        got = dict(parrot.parse_users(users))
+        self.assertEqual(got, {})

@@ -5,8 +5,8 @@ Parrot - A twitter-like feed parser
 """
 
 import codecs
-import io
 import logging
+import re
 from collections import defaultdict
 
 log = logging.getLogger()
@@ -49,13 +49,14 @@ def parse_users(users_file):
     """
     users = defaultdict(set)
     for line in read_file(users_file):
-        try:
-            follower, _, posters = line.split(' ', 2)
-        except ValueError:
-            continue
-        for poster in posters.split(','):
-            poster = poster.strip()
-            users[poster].add(follower)
+        m = re.search(r'^\s?(.+?)\sfollows(\s.*)?', line, flags = re.I)
+        if m:
+            follower, posters = m.groups()
+            follower = follower.strip()
+            if posters:
+                for poster in posters.split(','):
+                    poster = poster.strip()
+                    users[poster].add(follower)
             # Make sure eacch followers has an entry, even if they
             # do not actually post
             users[follower]
