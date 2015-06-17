@@ -5,6 +5,7 @@ python:
 install:
   - pip install coveralls
 script:
-  coverage run --source=parrot.py -m unittest discover
+  - coverage run -p --source=parrot.py -m unittest discover
 after_success:
-  coveralls
+  - coverage combine
+  - coveralls

@@ -82,6 +82,14 @@ class TestPrescribedFiles(TestCase):
     def test_commandline(self):
         prog = os.path.join(root_path, '..', 'parrot.py')
         args = [prog, '-u', users_file, '-t', tweets_file]
+        # If coverage is available, use it
+        try:
+            import coverage
+        except:
+            pass
+        else:
+            args = ['coverage', 'run', '-p'] + args
+            print(' '.join(args))
         got = subprocess.check_output(args)
         # subprocess.check_args output is bytes and always has an extra newline
         got = got.decode('ascii')[:-1]
