@@ -11,6 +11,12 @@ from collections import defaultdict
 
 log = logging.getLogger()
 
+# Template to use for printing each user block
+tmpl_user = '{follower}\n{tweets}\n'
+
+# Template to use for printing each line
+tmpl_line = '\t@{poster}: {tweet}\n'
+
 
 def log_handler(err):
     """
@@ -67,8 +73,8 @@ def parse_tweets(tweets_file, users):
     """
     Parse tweets and return a list of tweets to be reported for each user.
 
-    The output is a dict with follower names as keys and a list of
-    tuples `(poster name, tweet)` as values.
+    The output is a dict with follower names as keys and a list of tweets
+    formatted according to `tmpl_line`.
     """
     tweets_per_user = defaultdict(list)
     for line in read_file(tweets_file):
@@ -78,10 +84,11 @@ def parse_tweets(tweets_file, users):
             continue
         poster = poster.strip()
         tweet = tweet.strip()
+        formatted_tweet = tmpl_line.format(poster=poster, tweet=tweet)
         # Always add the tweet to the poster
-        tweets_per_user[poster].append((poster, tweet))
+        tweets_per_user[poster].append(formatted_tweet)
         for follower in users[poster]:
-            tweets_per_user[follower].append((poster, tweet))
+            tweets_per_user[follower].append(formatted_tweet)
     return tweets_per_user
 
 
@@ -89,14 +96,10 @@ def format_output(tweets_per_user, users):
     """
     Return formatted output for each user.
     """
-    output = ''
-    for follower in sorted(users):
-        output += '{}\n'.format(follower)
-        tweets = tweets_per_user[follower]
-        for user, tweet in tweets:
-            output += '\t@{}: {}\n'.format(user, tweet)
-        output += '\n'
-    return output
+    return ''.join(tmpl_user.format(
+        follower=u,
+        tweets=''.join(tweets_per_user[u])) for u in sorted(users)
+    )
 
 
 def main(users_file, tweets_file):

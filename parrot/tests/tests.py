@@ -65,16 +65,15 @@ class TestPrescribedFiles(TestCase):
         """
         expect = defaultdict(list, {
             'Alan': [
-                ('Alan', 'If you have a procedure with 10 parameters, you probably missed some.'),
-                ('Alan', 'Random numbers should not be generated with a method chosen at random.')
+                '\t@Alan: If you have a procedure with 10 parameters, you probably missed some.\n',
+                '\t@Alan: Random numbers should not be generated with a method chosen at random.\n',
             ],
             'Ward': [
-                ('Alan', 'If you have a procedure with 10 parameters, you probably missed some.'),
-                ('Ward', 'There are only two hard things in Computer Science: cache invalidation, naming things and off-by-1 errors.'),
-                ('Alan', 'Random numbers should not be generated with a method chosen at random.')
+                '\t@Alan: If you have a procedure with 10 parameters, you probably missed some.\n',
+                '\t@Ward: There are only two hard things in Computer Science: cache invalidation, naming things and off-by-1 errors.\n',
+                '\t@Alan: Random numbers should not be generated with a method chosen at random.\n',
             ]
         })
-        self.maxDiff = None
         got = parrot.parse_tweets(tweets_file, self.expected_users)
         self.assertEqual(dict(got), dict(expect))
 
