@@ -4,6 +4,7 @@
 Parrot - A twitter-like feed parser
 """
 
+import argparse
 import codecs
 import logging
 import re
@@ -118,3 +119,41 @@ def main(users_file, tweets_file):
     tweets_per_user = parse_tweets(tweets_file, users)
     output = format_output(tweets_per_user, users)
     return output
+
+
+def commandline():
+    """
+    Provide a command line interface to the program.
+    """
+    parser = argparse.ArgumentParser(description='A twitter-like feed parser')
+    parser.add_argument(
+        '-u',
+        '--users',
+        required=True,
+        help='File containing a list of users and followers'
+    )
+
+    parser.add_argument(
+        '-t',
+        '--tweets',
+        required=True,
+        help='File containing a list of tweets'
+    )
+
+    parser.add_argument(
+        '-o',
+        '--output',
+        help='File to write output to. If omitted, STDOUT will be used.'
+    )
+
+    v = parser.parse_args()
+    output = main(v.users, v.tweets)
+    if v.output:
+        with open(v.output, 'w', encoding='ascii') as fh:
+            fh.write(output)
+    else:
+        print(output)
+
+
+if __name__ == '__main__':
+    commandline()
