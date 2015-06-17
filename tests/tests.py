@@ -10,7 +10,7 @@ import io
 import os.path
 from collections import defaultdict
 
-from parrot import parrot
+import parrot
 
 
 # Define this here to keep the test function itself neat
