@@ -66,6 +66,8 @@ def parse_users(users_file):
             # Make sure eacch followers has an entry, even if they
             # do not actually post
             users[follower]
+        elif len(line.strip()) > 0:
+            log.warning("Users line %d: Badly formed line", lineno)
     return users
 
 

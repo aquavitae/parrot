@@ -184,6 +184,15 @@ class TestParseUsersFormat(TestCase):
         got = dict(parrot.parse_users(users))
         self.assertEqual(got, {'a': set()})
 
+    def test_missing_follower(self):
+        """
+        This line cannot be parsed
+        """
+        users = io.BytesIO(b'follows b')
+        with self.assertLogs(parrot.log, 'WARN'):
+            got = dict(parrot.parse_users(users))
+        self.assertEqual(got, {})
+
     def test_double_names(self):
         users = io.BytesIO(b'a b follows b c, c d')
         got = dict(parrot.parse_users(users))
@@ -194,5 +203,6 @@ class TestParseUsersFormat(TestCase):
         This should not parse, since "afollowsb" could be someone's name.
         """
         users = io.BytesIO(b'afollowsb')
-        got = dict(parrot.parse_users(users))
+        with self.assertLogs(parrot.log, 'WARN'):
+            got = dict(parrot.parse_users(users))
         self.assertEqual(got, {})
