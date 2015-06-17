@@ -2,6 +2,7 @@
 Exercise: Twitter-like feed parser
 
 [![Build Status](https://travis-ci.org/aquavitae/parrot.svg?branch=master)](https://travis-ci.org/aquavitae/parrot)
+[![Coverage Status](https://coveralls.io/repos/aquavitae/parrot/badge.svg)](https://coveralls.io/r/aquavitae/parrot)
 
 ## Introduction
 
@@ -17,7 +18,7 @@ following input files:
   Alan follows Martin
   Ward follows Martin, Alan
   ```
-  
+
 * `tweet.txt`
 
   ```
@@ -41,7 +42,7 @@ Print the following output:
       @Alan: Random numbers should not be generated with a method chosen at random.​
 
   ```
-  
+
 ## Installation
 
 Parrot required Python >=3.4 and can be installed using pip:
@@ -53,11 +54,11 @@ Parrot required Python >=3.4 and can be installed using pip:
 ## Usage
 
 In its simplest form, parrot can be called as:
-    
+
     parrot.py -u user.txt -t tweet.txt
 
 and will print the list of posts as described above to `STDOUT`. Any errors or warning are logged to `STDERR`. Optionally, an output file may be specified using the `--output` or `-o` argument, in which case the list of posts is written to that file.  The output file is ASCII encoded and line endings are a single carriage return (i.e. `\n`).
-    
+
 `parrot -h` will show the following usage guide:
 
     parrot.py [-h] -u USERS -t TWEETS [-o OUTPUT]
