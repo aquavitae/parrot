@@ -1,6 +1,8 @@
 # parrot
 Exercise: Twitter-like feed parser
 
+[![Build Status](https://travis-ci.org/aquavitae/parrot.svg?branch=master)](https://travis-ci.org/aquavitae/parrot)
+
 ## Introduction
 
 Parrot reads two input files, a list of users and followers and a list of
