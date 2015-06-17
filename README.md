@@ -94,3 +94,6 @@ and will print the list of posts as described above to `STDOUT`. Any errors or w
 
 * Tweets are processed in the order they are found in the input file, and
   this is assumed to be the order in which they are posted.
+
+* Fatal exceptions (e.g. invalid filenames) are reflected by an unhandled
+  python error.  This is assumed to be informative enough to show the problem.
