@@ -8,6 +8,8 @@ from unittest import TestCase
 
 import io
 import os.path
+import subprocess
+
 from collections import defaultdict
 
 import parrot
@@ -76,6 +78,14 @@ class TestPrescribedFiles(TestCase):
         })
         got = parrot.parse_tweets(tweets_file, self.expected_users)
         self.assertEqual(dict(got), dict(expect))
+
+    def test_commandline(self):
+        prog = os.path.join(root_path, '..', 'parrot.py')
+        args = [prog, '-u', users_file, '-t', tweets_file]
+        got = subprocess.check_output(args)
+        # subprocess.check_args output is bytes and always has an extra newline
+        got = got.decode('ascii')[:-1]
+        self.assertEqual(got, expected_main_functionality_output)
 
 
 class TestInputFiles(TestCase):
