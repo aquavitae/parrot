@@ -261,3 +261,14 @@ class TestParseTweetsFormat(TestCase):
         with self.assertLogs(parrot.log, 'ERROR'):
             got = dict(parrot.parse_tweets(tweets, users))
         self.assertEqual(got, {})
+
+    def test_long_tweet(self):
+        """
+        Maximum length is 140 characters.
+        """
+        tweets = io.BytesIO(b'a> ' + (b'a very long post ') * 30)
+        users = {'a': set()}
+        with self.assertLogs(parrot.log, 'WARN'):
+            got = dict(parrot.parse_tweets(tweets, users))
+        expect = {'a': ['\t@a: a very long post a very long post a very long post a very long post a very long post a very long post a very long post a very long post a ve\n']}
+        self.assertEqual(got, expect)

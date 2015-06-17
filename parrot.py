@@ -87,6 +87,10 @@ def parse_tweets(tweets_file, users):
             poster, tweet = m.groups()
             poster = poster.strip()
             tweet = tweet.strip()
+            # Max length of tweet is 140 chrs
+            if len(tweet) > 140:
+                log.warning("Tweets line %d: Truncated to 140 characters")
+                tweet = tweet[:140]
             formatted_tweet = tmpl_line.format(poster=poster, tweet=tweet)
             if poster not in users:
                 log.error("Tweets line %d: '%s' is not a valid user",
