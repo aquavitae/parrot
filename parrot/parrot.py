@@ -79,18 +79,23 @@ def parse_tweets(tweets_file, users):
     formatted according to `tmpl_line`.
     """
     tweets_per_user = defaultdict(list)
-    for line in read_file(tweets_file):
-        try:
-            poster, tweet = line.split('>', 1)
-        except ValueError:
-            continue
-        poster = poster.strip()
-        tweet = tweet.strip()
-        formatted_tweet = tmpl_line.format(poster=poster, tweet=tweet)
-        # Always add the tweet to the poster
-        tweets_per_user[poster].append(formatted_tweet)
-        for follower in users[poster]:
-            tweets_per_user[follower].append(formatted_tweet)
+    for lineno, line in enumerate(read_file(tweets_file)):
+        m = re.search(r'^(.+?)>(.*)', line, flags=re.I)
+        if m:
+            poster, tweet = m.groups()
+            poster = poster.strip()
+            tweet = tweet.strip()
+            formatted_tweet = tmpl_line.format(poster=poster, tweet=tweet)
+            if poster not in users:
+                log.error("Tweets line %d: '%s' is not a valid user",
+                          lineno, poster)
+                continue
+            # Always add the tweet to the poster
+            tweets_per_user[poster].append(formatted_tweet)
+            for follower in users[poster]:
+                tweets_per_user[follower].append(formatted_tweet)
+        elif len(line.strip()) > 0:
+            log.warning("Tweets line %d: Badly formed line", lineno)
     return tweets_per_user
 
 

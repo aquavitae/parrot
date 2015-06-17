@@ -206,3 +206,48 @@ class TestParseUsersFormat(TestCase):
         with self.assertLogs(parrot.log, 'WARN'):
             got = dict(parrot.parse_users(users))
         self.assertEqual(got, {})
+
+
+class TestParseTweetsFormat(TestCase):
+
+    """
+    Test different permutations of the tweets file format
+    """
+
+    def test_single_line(self):
+        tweets = io.BytesIO(b'a> post')
+        users = {'a': set()}
+        got = dict(parrot.parse_tweets(tweets, users))
+        self.assertEqual(got, {'a': ['\t@a: post\n']})
+
+    def test_blanks_and_spaces(self):
+        tweets = io.BytesIO(b'  a > post  \n\n     \n\na>another  post\n\n')
+        users = {'a': set()}
+        got = dict(parrot.parse_tweets(tweets, users))
+        self.assertEqual(got, {'a': ['\t@a: post\n', '\t@a: another  post\n']})
+
+    def test_symbols(self):
+        tweets = io.BytesIO(b'a>>post>:')
+        users = {'a': set()}
+        got = dict(parrot.parse_tweets(tweets, users))
+        self.assertEqual(got, {'a': ['\t@a: >post>:\n']})
+
+    def test_missing_post(self):
+        tweets = io.BytesIO(b'a>')
+        users = {'a': set()}
+        got = dict(parrot.parse_tweets(tweets, users))
+        self.assertEqual(got, {'a': ['\t@a: \n']})
+
+    def test_missing_poster(self):
+        tweets = io.BytesIO(b'> post')
+        users = {'a': set()}
+        with self.assertLogs(parrot.log, 'WARN'):
+            got = dict(parrot.parse_tweets(tweets, users))
+        self.assertEqual(got, {})
+
+    def test_no_valid_poster(self):
+        tweets = io.BytesIO(b'a> post')
+        users = {'b': set()}
+        with self.assertLogs(parrot.log, 'ERROR'):
+            got = dict(parrot.parse_tweets(tweets, users))
+        self.assertEqual(got, {})
