@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -55,8 +56,8 @@ def parse_users(users_file):
     have an entry.
     """
     users = defaultdict(set)
-    for line in read_file(users_file):
-        m = re.search(r'^\s?(.+?)\sfollows(\s.*)?', line, flags = re.I)
+    for lineno, line in enumerate(read_file(users_file)):
+        m = re.search(r'^\s?(.+?)\sfollows(\s.*)?', line, flags=re.I)
         if m:
             follower, posters = m.groups()
             follower = follower.strip()
